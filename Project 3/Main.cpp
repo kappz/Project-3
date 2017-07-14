@@ -36,6 +36,7 @@ protected:
 	OrientType orient;
 };
 
+// Ship function definitions
 Ship::Ship(OrientType orientation, int begRow, int begCol)
 {
 	// verify legal orientation 
@@ -47,9 +48,13 @@ Ship::Ship(OrientType orientation, int begRow, int begCol)
 	{
 		cout << "Invalid ship orientation" << endl;
 	}
-	if (begRow < 1 || begRow > 10 || begCol) // verify legal bounds
+	if (begRow < 1 || begRow > 10) // verify legal bounds
 	{
-		cout << "Invavlid start row and or start column" << endl;
+		cout << "Invalid start row" << endl;
+	}
+	else if (begCol < 1 || begCol > 10)
+	{
+		cout << "Invalid start column." << endl;
 	}
 	else
 	{
@@ -91,18 +96,68 @@ class Destroyer : public Ship
 {
 public:
 	Destroyer(OrientType, int, int);
-
 };
 
+// Destroyer function definitions
 Destroyer::Destroyer(OrientType orientation, int begRow, int begCol)
 	: Ship(orientation, begRow, begCol)
 {
-	type = "destroyer";
+	type = "Destroyer";
 	speed = 0;
 	length = 3;
 	damage = 4;
-	
 
+	// verify ship doesn't exceed the board's boundaries when placed at starting square
+	if (orientation == south && (begRow + (length - 1) > 10))
+	{
+		cout << "Invalid ship placement, ship extends beyond the board's bounds." << endl;
+	}
+	if (orientation == north && (begRow - (length - 1)) < 1)
+	{
+		cout << "Invalid ship placement, ship extends beyond the board's bounds." << endl;
+	}
+	if (orientation == east && (begRow + (length - 1) > 10))
+	{
+		cout << "Invalid ship placement, ship extends beyond the board's bounds." << endl;
+	}
+	if (orientation == west && (begCol - (length - 1)) < 1)
+	{
+		cout << "Invalid ship placement, ship extends the board's bounds." << endl;
+	}
+}
+
+class Carrier : public Ship
+{
+public:
+	Carrier(OrientType, int, int);
+};
+
+// Carrier function definitions
+Carrier::Carrier(OrientType orientation, int begRow, int begCol)
+	: Ship(orientation, begRow, begCol)
+{
+	type = "Carrier";
+	speed = 1;
+	length = 4;
+	damage = 3;
+
+	// verify ship doesn't exceed the board's boundaries when placed at starting square
+	if (orientation == south && (begRow + (length - 1) > 10))
+	{
+		cout << "Invalid ship placement, ship extends beyond the board's bounds." << endl;
+	}
+	if (orientation == north && (begRow - (length - 1)) < 1)
+	{
+		cout << "Invalid ship placement, ship extends beyond the board's bounds." << endl;
+	}
+	if (orientation == east && (begRow + (length - 1) > 10))
+	{
+		cout << "Invalid ship placement, ship extends beyond the board's bounds." << endl;
+	}
+	if (orientation == west && (begCol - (length - 1)) < 1)
+	{
+		cout << "Invalid ship placement, ship extends the board's bounds." << endl;
+	}
 }
 
 OrientType str2Orient(string dir) {
@@ -138,8 +193,9 @@ ostream & operator<<(ostream &out, Ship* ship)
 
 int main()
 {
-	Ship* a = new Destroyer(str2Orient("south"), 1, 10);
-	cout << a;
+	Ship* a = new Destroyer(str2Orient("south"), 8, 9);
+	Ship* b = new Carrier(str2Orient("south"), 7, 4);
+	cout << a << endl << b << endl;
 	system("pause");
 	return 0;
 }
