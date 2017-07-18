@@ -23,7 +23,7 @@ public:
 	int getStartCol();
 	string getType();
 	OrientType getOrient();
-	void move(const int& speed);
+	void move(int vel);
 	void getHit(Ship shipType);
 
 protected:
@@ -62,6 +62,7 @@ Ship::Ship(OrientType orientation, int begRow, int begCol)
 		startCol = begCol;
 	}
 }
+
 int Ship::getSpeed()
 {
 	return speed;
@@ -92,6 +93,60 @@ OrientType Ship::getOrient()
 	return orient;
 }
 
+void Ship::move(int vel)
+{
+	if (vel < 0)  // if speed is set below min
+	{
+		vel = 0;
+	}
+	if (vel > speed)  // if speed is set above max
+	{
+		vel = speed;
+	}
+	// compute new start square if movement is within board bounds
+	if (orient == north && ( ((startRow - vel) - (length - 1)) >= 1) )
+	{
+		startRow -= vel;
+	}
+	else if (orient == south && ( ((startRow + vel) + (length - 1)) <= 10) )
+	{
+		startRow += vel;
+	}
+	else if (orient == east && ( ((startCol + vel) + (length - 1)) <= 10) )
+	{
+		startCol += vel;
+	}
+	else if (orient == west && ( ((startCol - vel) - (length - 1)) >= 1) )
+	{
+		startCol -= vel;
+	}
+	// compute new start square if movement exceeds board bounds
+	else if (orient == north && ( ((startRow - vel) - (length - 1)) < 1) )
+	{
+		startRow = 1;
+		orient = south;
+	}
+	else if (orient == south && ( ((startRow + vel) + (length - 1)) > 10) )
+	{
+		startRow = 10;
+		orient = north;
+	}
+	else if (orient == east && ( ((startCol + vel) + (length - 1)) > 10) )
+	{
+		startCol = 10;
+		orient = west;
+	}
+	else if (orient == west && ( ((startCol - vel) - (length - 1)) < 1) )
+	{
+		startCol = 1;
+		orient = east;
+	}
+}
+
+void Ship::getHit(Ship shipType)
+{
+
+}
 class Destroyer : public Ship
 {
 public:
@@ -103,7 +158,7 @@ Destroyer::Destroyer(OrientType orientation, int begRow, int begCol)
 	: Ship(orientation, begRow, begCol)
 {
 	type = "Destroyer";
-	speed = 0;
+	speed = 3;
 	length = 3;
 	damage = 4;
 
@@ -160,6 +215,38 @@ Carrier::Carrier(OrientType orientation, int begRow, int begCol)
 	}
 }
 
+class Sub : public Ship
+{
+public:
+	Sub(OrientType, int, int);
+	void setUwater(bool);
+	bool getUwater();
+
+private:
+	bool uWater;
+};
+
+// sub function definitions
+Sub::Sub(OrientType orientation, int begRow, int begCol)
+	: Ship(orientation, begRow, begCol)
+{
+	type = "sub";
+	length = 2;
+	speed = 2;
+	damage = 2;
+	uWater = false;
+}
+
+void Sub::setUwater(bool tempUWater)
+{
+	uWater = tempUWater;
+}
+
+bool Sub::getUwater()
+{
+	return uWater;
+}
+
 OrientType str2Orient(string dir) {
 	if (dir == "north") return north;
 	else if (dir == "south") return south;
@@ -196,6 +283,39 @@ int main()
 	Ship* a = new Destroyer(str2Orient("south"), 8, 9);
 	Ship* b = new Carrier(str2Orient("south"), 7, 4);
 	cout << a << endl << b << endl;
-	system("pause");
+
+	char choice;
+	int numShips, shipId, vel, attackedId;
+	string direction, shipType;
+	int startRow, startCol;
+	vector<Ship *> fleet;
+
+	cin >> choice;
+	while (choice != 'q') {
+		if (choice == 'i') {// initialize
+			cin >> numShips;
+			fleet.resize(numShips);
+			for (int i = 0; i < numShips; i++) {
+				cin >> shipType >> direction >> startRow >> startCol;
+				if (shipType == "destroy")
+					fleet[i] = new Destroyer(str2Orient(direction), startRow, startCol);
+				else if (shipType == "carry") {
+					fleet[i] = new Carrier(str2Orient(direction), startRow, startCol);
+				}
+				else if (shipType == "sub") {
+					fleet[i] = new Sub(str2Orient(direction), startRow, startCol);
+				}
+			}
+		}
+		else if (choice == 's') {// status of fleet
+			for (int i = 0; i < fleet.size(); i++)
+				cout << (fleet[i]) << endl;
+		}
+		else if (choice == 'm') { // move
+			cin >> shipId >> vel;
+			fleet[shipId]->move(vel);
+		}
+		cin >> choice;
+	}
 	return 0;
 }
